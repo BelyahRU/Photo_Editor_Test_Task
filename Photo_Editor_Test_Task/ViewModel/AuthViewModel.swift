@@ -13,7 +13,7 @@ final class AuthViewModel: ObservableObject {
     @Published var password: String = ""
     
     //MARK: - Error
-    @Published var loginError: AuthError?
+    @Published var authError: AuthError?
     
     //MARK: - States
     @Published var isLoading: Bool = false
@@ -32,14 +32,14 @@ final class AuthViewModel: ObservableObject {
     }
     
     private func asyncLogin() async {
-        loginError = nil
+        authError = nil
         isLoading = true
 
         do {
             let authResult = try await Auth.auth().signIn(withEmail: email, password: password)
 
             if !authResult.user.isEmailVerified {
-                loginError = .emailNotVerified
+                authError = .emailNotVerified
                 isLoading = false
                 return
             }
@@ -49,13 +49,13 @@ final class AuthViewModel: ObservableObject {
         } catch let error as NSError {
             switch error.code {
             case AuthErrorCode.userNotFound.rawValue:
-                loginError = .userNotFound
+                authError = .userNotFound
             case AuthErrorCode.wrongPassword.rawValue:
-                loginError = .wrongPassword
+                authError = .wrongPassword
             case AuthErrorCode.invalidEmail.rawValue:
-                loginError = .invalidEmail
+                authError = .invalidEmail
             default:
-                loginError = .networkError(error.localizedDescription)
+                authError = .networkError(error.localizedDescription)
             }
         }
 
@@ -68,7 +68,7 @@ final class AuthViewModel: ObservableObject {
         Task {
             await MainActor.run {
                 isLoading = true
-                loginError = nil
+                authError = nil
             }
 
             do {
@@ -81,11 +81,11 @@ final class AuthViewModel: ObservableObject {
                 await MainActor.run {
                     switch error.code {
                     case AuthErrorCode.userDisabled.rawValue:
-                        loginError = .networkError("This account has been disabled.")
+                        authError = .networkError("This account has been disabled.")
                     case AuthErrorCode.networkError.rawValue:
-                        loginError = .networkError("Network error occurred.")
+                        authError = .networkError("Network error occurred.")
                     default:
-                        loginError = .networkError(error.localizedDescription)
+                        authError = .networkError(error.localizedDescription)
                     }
                 }
             }
@@ -102,14 +102,14 @@ final class AuthViewModel: ObservableObject {
     private func startValidation() -> Bool {
         switch validator.checkEmail(email) {
         case .failure:
-            loginError = .invalidEmail
+            authError = .invalidEmail
             return false
         case .success: break
         }
 
         switch validator.checkPassword(password) {
         case .failure:
-            loginError = .weakPassword
+            authError = .weakPassword
             return false
         case .success: break
         }

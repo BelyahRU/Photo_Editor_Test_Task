@@ -27,7 +27,7 @@ struct AuthView: View {
                         isSecureTextVisible: $showPassword
                     )
 
-                if let error = viewModel.loginError {
+                if let error = viewModel.authError {
                     Text(error.errorDescription ?? "Unknown error")
                         .foregroundColor(.red)
                 }
