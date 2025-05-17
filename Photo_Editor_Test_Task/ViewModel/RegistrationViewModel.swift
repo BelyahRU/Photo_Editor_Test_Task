@@ -12,13 +12,15 @@ final class RegistrationViewModel: ObservableObject {
     @Published var confirmPassword: String = ""
     
     // MARK: - States
-    @Published var registrationErrorMessage: String? = nil
     @Published var isLoading: Bool = false
     @Published var isVerificationSent: Bool = false
     @Published var isEmailVerified = false
-    @Published var verificationErrorMessage: String? = nil
     
-    private let validator = Validator()
+    //MARK: - Errors
+    @Published var registrationError: RegistrationError?
+    @Published var verificationError: VerificationError?
+    
+    private let validator = ValidationService()
 
     init() {
         if let user = Auth.auth().currentUser, !user.isEmailVerified {
@@ -29,91 +31,107 @@ final class RegistrationViewModel: ObservableObject {
 
     func register() {
         Task {
-            // if user already registered
+            // Is the user already registered?
             if let user = Auth.auth().currentUser {
+                // email is registred but not verified
                 if user.email == email && !user.isEmailVerified {
-                    // user registred, but not verified email
-                    registrationErrorMessage = "You have already created an account. Please verify your email."
+                    registrationError = .emailIsNotVerified
                     isVerificationSent = true
                     return
+                // email is registred and verified
                 } else if user.email == email && user.isEmailVerified {
-                    // user registered and email is verified
-                    registrationErrorMessage = "Email is already verified and in use."
+                    registrationError = .emailAlreadyInUse
                     return
                 }
             }
+
             await asyncRegistration()
         }
     }
-    
-    func asyncRegistration() async {
-        registrationErrorMessage = nil
+
+    private func asyncRegistration() async {
+        registrationError = nil
         
-        // Validation
-        guard startValidation() else {
+        // starting validation
+        if let validationError = startValidation() {
+            registrationError = validationError
+            isLoading = false
             return
         }
-        
+
         isLoading = true
-        
+
         do {
+            // trying auth
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             print("User created: \(result.user.uid)")
-            registrationErrorMessage = nil
-            
-            // start email verification
-            try await result.user.sendEmailVerification()
 
+            // trying email verification
+            try await result.user.sendEmailVerification()
             isVerificationSent = true
             print("Verification email sent to \(result.user.email ?? "")")
+        } catch let error as NSError {
+            switch error.code {
+            case AuthErrorCode.emailAlreadyInUse.rawValue:
+                registrationError = .emailAlreadyInUse
+            default:
+                registrationError = .networkError(error.localizedDescription)
+            }
         } catch {
-            registrationErrorMessage = error.localizedDescription
+            registrationError = .networkError(error.localizedDescription)
         }
-        
+
         isLoading = false
     }
     
+    //MARK: - Email Verification
     func checkEmailVerification() {
         Task {
             guard let user = Auth.auth().currentUser else { return }
-            try? await user.reload()
-            if user.isEmailVerified {
-                isEmailVerified = true
-                isVerificationSent = false // --> show MainView
-                verificationErrorMessage = nil
-            } else {
-                verificationErrorMessage = "Email is not verified yet. Please try again."
+            do {
+                try await user.reload()
+                if user.isEmailVerified {
+                    isEmailVerified = true
+                    isVerificationSent = false
+                    verificationError = nil
+                } else {
+                    verificationError = .emailNotVerifiedYet
+                }
+            } catch {
+                verificationError = .networkError(error.localizedDescription)
             }
         }
     }
 
     // MARK: - Validation
-    private func startValidation() -> Bool {
-        
-        // сhecking email
+    private func startValidation() -> RegistrationError? {
+
+        // checking email
         switch validator.checkEmail(email) {
-        case .failure(let message):
-            registrationErrorMessage = message
-            return false
-        case .success: break
+            case .failure:
+                return .invalidEmail
+            case .success: break
         }
-        
-        // сhecking password
+
+        // checking password
         switch validator.checkPassword(password) {
-        case .failure(let message):
-            registrationErrorMessage = message
-            return false
-        case .success: break
+            case .failure:
+                return .weakPassword
+            case .success: break
         }
-        
-        // сhecking password match
+
+        // checking passwords match
         switch validator.checkPasswordMatch(password, confirmPassword) {
-        case .failure(let message):
-            registrationErrorMessage = message
-            return false
-        case .success: break
+            case .failure:
+                return .passwordsDontMatch
+            case .success: break
         }
-        
-        return true
+
+        // checking empty fields
+        if email.isEmpty || password.isEmpty || confirmPassword.isEmpty {
+            return .emptyFields
+        }
+
+        return nil
     }
 }

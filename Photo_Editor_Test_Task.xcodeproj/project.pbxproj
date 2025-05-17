@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1A571FBB2DD7997000E30A84 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1A571FBA2DD7997000E30A84 /* FirebaseAuth */; };
+		1A9174972DD8F92E009014BF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 1A9174962DD8F92E009014BF /* GoogleSignIn */; };
+		1A9174992DD8F92E009014BF /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1A9174982DD8F92E009014BF /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +29,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A9174992DD8F92E009014BF /* GoogleSignInSwift in Frameworks */,
 				1A571FBB2DD7997000E30A84 /* FirebaseAuth in Frameworks */,
+				1A9174972DD8F92E009014BF /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +75,8 @@
 			name = Photo_Editor_Test_Task;
 			packageProductDependencies = (
 				1A571FBA2DD7997000E30A84 /* FirebaseAuth */,
+				1A9174962DD8F92E009014BF /* GoogleSignIn */,
+				1A9174982DD8F92E009014BF /* GoogleSignInSwift */,
 			);
 			productName = Photo_Editor_Test_Task;
 			productReference = 1A571F9B2DD7944100E30A84 /* Photo_Editor_Test_Task.app */;
@@ -102,6 +108,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				1A571FB92DD7997000E30A84 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				1A9174952DD8F92E009014BF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1A571F9C2DD7944100E30A84 /* Products */;
@@ -264,6 +271,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Photo-Editor-Test-Task-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -299,6 +307,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Photo-Editor-Test-Task-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -355,6 +364,14 @@
 				minimumVersion = 11.12.0;
 			};
 		};
+		1A9174952DD8F92E009014BF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -362,6 +379,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1A571FB92DD7997000E30A84 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		1A9174962DD8F92E009014BF /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1A9174952DD8F92E009014BF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		1A9174982DD8F92E009014BF /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1A9174952DD8F92E009014BF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
