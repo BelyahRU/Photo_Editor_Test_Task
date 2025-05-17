@@ -1,4 +1,3 @@
-
 import Foundation
 import SwiftUI
 import Combine
@@ -7,19 +6,20 @@ import FirebaseAuth
 @MainActor
 final class RegistrationViewModel: ObservableObject {
     
-    //MARK: - User data
+    // MARK: - User data
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var confirmPassword: String = ""
     
-    //MARK: - States
+    // MARK: - States
     @Published var registrationErrorMessage: String? = nil
     @Published var isLoading: Bool = false
     @Published var isVerificationSent: Bool = false
     @Published var isEmailVerified = false
     @Published var verificationErrorMessage: String? = nil
     
-    
+    private let validator = Validator()
+
     init() {
         if let user = Auth.auth().currentUser, !user.isEmailVerified {
             self.email = user.email ?? ""
@@ -29,15 +29,15 @@ final class RegistrationViewModel: ObservableObject {
 
     func register() {
         Task {
-            // если уже есть текущий пользователь
+            // if user already registered
             if let user = Auth.auth().currentUser {
                 if user.email == email && !user.isEmailVerified {
-                    // пользователь уже зарегистрирован, но не подтвердил email
+                    // user registred, but not verified email
                     registrationErrorMessage = "You have already created an account. Please verify your email."
                     isVerificationSent = true
                     return
                 } else if user.email == email && user.isEmailVerified {
-                    // пользователь зарегестрирован и email подтвержден
+                    // user registered and email is verified
                     registrationErrorMessage = "Email is already verified and in use."
                     return
                 }
@@ -46,11 +46,11 @@ final class RegistrationViewModel: ObservableObject {
         }
     }
     
-    
     func asyncRegistration() async {
         registrationErrorMessage = nil
         
-        if !startValidation() {
+        // Validation
+        guard startValidation() else {
             return
         }
         
@@ -61,6 +61,7 @@ final class RegistrationViewModel: ObservableObject {
             print("User created: \(result.user.uid)")
             registrationErrorMessage = nil
             
+            // start email verification
             try await result.user.sendEmailVerification()
 
             isVerificationSent = true
@@ -68,6 +69,8 @@ final class RegistrationViewModel: ObservableObject {
         } catch {
             registrationErrorMessage = error.localizedDescription
         }
+        
+        isLoading = false
     }
     
     func checkEmailVerification() {
@@ -76,7 +79,7 @@ final class RegistrationViewModel: ObservableObject {
             try? await user.reload()
             if user.isEmailVerified {
                 isEmailVerified = true
-                isVerificationSent = false // переход в MainContentView
+                isVerificationSent = false // --> show MainView
                 verificationErrorMessage = nil
             } else {
                 verificationErrorMessage = "Email is not verified yet. Please try again."
@@ -84,34 +87,33 @@ final class RegistrationViewModel: ObservableObject {
         }
     }
 
-    
+    // MARK: - Validation
     private func startValidation() -> Bool {
-        if !checkEmail(email) {
-            registrationErrorMessage = "Invalid email"
+        
+        // сhecking email
+        switch validator.checkEmail(email) {
+        case .failure(let message):
+            registrationErrorMessage = message
             return false
+        case .success: break
         }
         
-        if password != confirmPassword {
-            registrationErrorMessage = "Password don't match"
+        // сhecking password
+        switch validator.checkPassword(password) {
+        case .failure(let message):
+            registrationErrorMessage = message
             return false
+        case .success: break
         }
         
-        if !checkStrongPassword(password) {
-            registrationErrorMessage = "Password is too simple or less then 6 characters"
+        // сhecking password match
+        switch validator.checkPasswordMatch(password, confirmPassword) {
+        case .failure(let message):
+            registrationErrorMessage = message
             return false
+        case .success: break
         }
         
         return true
-    }
-    
-    private func checkEmail(_ userEmail: String) -> Bool {
-        let regex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
-        return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: userEmail)
-    }
-    
-    private func checkStrongPassword(_ password: String) -> Bool {
-        guard password.count >= 6 else { return false } // password less then 6 characters
-        let weakPass = ["123321", "asdfgh", "111111", "password", "qwerty", "pass123"]
-        return !weakPass.contains(password.lowercased())
     }
 }

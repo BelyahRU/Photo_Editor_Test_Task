@@ -1,5 +1,5 @@
-import SwiftUI
 
+import SwiftUI
 
 struct EmailVerificationView: View {
     let email: String

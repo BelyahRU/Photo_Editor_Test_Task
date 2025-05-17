@@ -22,16 +22,12 @@ struct RegistrationView: View {
                     .autocapitalization(.none)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                 
-                PasswordField(
-                    title: "Password",
-                    text: $viewModel.password,
-                    isSecureTextVisible: $showPassword
-                )
-                PasswordField(
-                    title: "Confirm Password",
-                    text: $viewModel.confirmPassword,
-                    isSecureTextVisible: $showConfirmPassword
-                )
+                Text("")
+                    .passwordToggle(placeholder: "Password", text: $viewModel.password, isSecureTextVisible: $showPassword)
+
+                Text("")
+                    .passwordToggle(placeholder: "Confirm Password", text: $viewModel.confirmPassword, isSecureTextVisible: $showConfirmPassword)
+                
                 
                 if let error = viewModel.registrationErrorMessage {
                     Text(error)
