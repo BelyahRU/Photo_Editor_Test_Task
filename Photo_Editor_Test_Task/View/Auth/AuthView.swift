@@ -2,10 +2,12 @@
 import SwiftUI
 import GoogleSignInSwift
 
+//MARK: Auth View authenticates users via Firebase
 struct AuthView: View {
     @StateObject private var viewModel = AuthViewModel()
     @State private var showPassword = false
 
+    //MARK: - Content
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
@@ -57,6 +59,7 @@ private extension AuthView {
             .textFieldStyle(RoundedBorderTextFieldStyle())
     }
 
+    // custom View Modifier
     var passwordTF: some View {
         Text("")
             .passwordToggle(
@@ -76,7 +79,7 @@ private extension AuthView {
             }
         }
     }
-
+    
     var loginButtonSection: some View {
         Group {
             if viewModel.isLoading {
@@ -89,7 +92,7 @@ private extension AuthView {
             }
         }
     }
-
+    
     var signInButton: some View {
         Button {
             viewModel.login()
@@ -102,6 +105,7 @@ private extension AuthView {
         .tint(.blue)
     }
 
+    // Button from GoogleSignInSwift lib
     var googleSignInButton: some View {
         GoogleSignInButton {
             if let rootVC = UIApplication.shared.connectedScenes
@@ -114,14 +118,17 @@ private extension AuthView {
         .frame(height: 48)
     }
 
+    // navigation
     var navigationLinks: some View {
         VStack {
+            // --> RegistrationView()
             NavigationLink(destination: RegistrationView()) {
                 Text("Don't have an account? Register")
                     .foregroundColor(.blue)
                     .padding(.top)
             }
-
+            
+            // --> PasswordResetView()
             Button {
                 viewModel.isResetPasswordPresented = true
             } label: {
@@ -131,6 +138,8 @@ private extension AuthView {
         }
     }
 
+    // modal view for resetting password
+    // this view shows from bottom to center
     var passwordResetModalView: some View {
         PasswordResetView {
             withAnimation {

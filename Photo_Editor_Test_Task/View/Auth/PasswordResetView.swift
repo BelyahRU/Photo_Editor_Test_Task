@@ -8,58 +8,17 @@ struct PasswordResetView: View {
 
     var body: some View {
         ZStack {
-            // Всплывающее окно
             VStack {
                 VStack(spacing: 16) {
-                    Text("Reset your password")
-                        .font(.title3)
-                        .bold()
+                    resetYourPasswordLabel
+                    
+                    emailTF
 
-                    // Скрываем поле email после успеха
-                    if viewModel.successMessage == nil {
-                        TextField("Email", text: $viewModel.email)
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
+                    errorMessage
 
-                    if let error = viewModel.error {
-                        Text(error.errorDescription ?? "Unknown error")
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                    }
+                    successMessage
 
-                    if let success = viewModel.successMessage {
-                        Text(success)
-                            .foregroundColor(.green)
-                            .multilineTextAlignment(.center)
-                    }
-
-                    if viewModel.successMessage == nil {
-                        HStack {
-                            Button("Cancel") {
-                                hideWithAnimation()
-                            }
-                            .foregroundColor(.red)
-
-                            Spacer()
-
-                            Button("Send") {
-                                viewModel.sendReset()
-                            }
-                            .buttonStyle(.borderedProminent)
-                        }
-                    } else {
-                        // Только большая кнопка Cancel
-                        Button("Close") {
-                            hideWithAnimation()
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(12)
-                    }
+                    actionButtons
                 }
                 .padding()
                 .background(Color.white)
@@ -71,6 +30,7 @@ struct PasswordResetView: View {
                 .opacity(showContent ? 1 : 0)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // i dont know why, but view is lower then center
             .position(CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2 - 300))
         }
         .onAppear {
@@ -88,6 +48,81 @@ struct PasswordResetView: View {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             onClose()
+        }
+    }
+}
+
+
+private extension PasswordResetView {
+    
+    var resetYourPasswordLabel: some View {
+        Text("Reset your password")
+            .font(.title3)
+            .bold()
+    }
+    
+    var emailTF: some View {
+        Group {
+            if viewModel.successMessage == nil {
+                TextField("Email", text: $viewModel.email)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+        }
+    }
+    
+    // showing when we have some errors
+    var errorMessage: some View {
+        Group {
+            if let error = viewModel.error {
+                Text(error.errorDescription ?? "Unknown error")
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+            }
+        }
+    }
+    
+    // showing when email sended
+    var successMessage: some View {
+        Group {
+            if let success = viewModel.successMessage {
+                Text(success)
+                    .foregroundColor(.green)
+                    .multilineTextAlignment(.center)
+            }
+        }
+    }
+    
+    var actionButtons: some View {
+        // if reset email sended --> show only 'Cancel'
+        // else --> show 'Cancel' and 'Send'
+        Group {
+            if viewModel.successMessage == nil {
+                HStack {
+                    Button("Cancel") {
+                        hideWithAnimation()
+                    }
+                    .foregroundColor(.red)
+
+                    Spacer()
+
+                    Button("Send") {
+                        viewModel.sendReset()
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            } else {
+                // Big 'Cancel' Button
+                Button("Close") {
+                    hideWithAnimation()
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.blue)
+                .cornerRadius(12)
+            }
         }
     }
 }

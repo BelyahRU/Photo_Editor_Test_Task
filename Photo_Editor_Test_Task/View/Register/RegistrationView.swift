@@ -1,6 +1,7 @@
 
 import SwiftUI
 
+//MARK: - Registration View handles user registration via Firebase
 struct RegistrationView: View {
     @StateObject private var viewModel = RegistrationViewModel()
     
@@ -13,8 +14,10 @@ struct RegistrationView: View {
             
             emailTF
             
+            // custom View Modifier
             passwordTF
 
+            // custom View Modifier
             confirmPasswordTF
             
             errorMessage
@@ -30,6 +33,7 @@ struct RegistrationView: View {
     
 }
 
+// MARK: - Private Views
 private extension RegistrationView {
     var header: some View {
         Text("Create your account")

@@ -1,6 +1,7 @@
 
 import SwiftUI
 
+//MARK: - View Modifier allows you to hide/show the password
 struct PasswordToggleModifier: ViewModifier {
     let placeholder: String
     @Binding var text: String
@@ -8,15 +9,17 @@ struct PasswordToggleModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         HStack {
+            // TextFields
             Group {
                 if isSecureTextVisible {
-                    TextField(placeholder, text: $text)
+                    TextField(placeholder, text: $text) // showing when button is "eye.slash"
                 } else {
-                    SecureField(placeholder, text: $text)
+                    SecureField(placeholder, text: $text) // showing when button is "eye"
                 }
             }
             .textFieldStyle(RoundedBorderTextFieldStyle())
 
+            // eye button
             Button(action: {
                 isSecureTextVisible.toggle()
             }) {
