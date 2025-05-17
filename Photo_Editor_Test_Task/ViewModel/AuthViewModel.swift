@@ -18,6 +18,7 @@ final class AuthViewModel: ObservableObject {
     //MARK: - States
     @Published var isLoading: Bool = false
     @Published var isSignedIn: Bool = false
+    @Published var isResetPasswordPresented = false
 
     private let validator = ValidationService()
     

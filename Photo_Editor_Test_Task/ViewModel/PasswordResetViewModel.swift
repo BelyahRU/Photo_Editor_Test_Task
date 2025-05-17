@@ -8,7 +8,7 @@ final class PasswordResetViewModel: ObservableObject {
     //MARK: - User data
     @Published var email: String = ""
     
-    //MARK: - Responces
+    //MARK: - Responses
     @Published var error: AuthError?
     @Published var successMessage: String?
 
