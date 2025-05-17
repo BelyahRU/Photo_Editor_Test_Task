@@ -9,28 +9,63 @@ struct RegistrationView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            Text("Create your account")
-                .font(.title)
-                .fontWeight(.medium)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+            header
             
-            TextField("Email", text: $viewModel.email)
-                .keyboardType(.emailAddress)
-                .autocapitalization(.none)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            emailTF
             
-            Text("")
-                .passwordToggle(placeholder: "Password", text: $viewModel.password, isSecureTextVisible: $showPassword)
+            passwordTF
 
-            Text("")
-                .passwordToggle(placeholder: "Confirm Password", text: $viewModel.confirmPassword, isSecureTextVisible: $showConfirmPassword)
+            confirmPasswordTF
             
+            errorMessage
             
+            createAccountButton
+            
+            navigationLinks
+        }
+        .padding(.bottom, 150)
+        .padding(.horizontal, 20)
+        .navigationTitle("Registration")
+    }
+    
+}
+
+private extension RegistrationView {
+    var header: some View {
+        Text("Create your account")
+            .font(.title)
+            .fontWeight(.medium)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.top, 8)
+    }
+    
+    var emailTF: some View {
+        TextField("Email", text: $viewModel.email)
+            .keyboardType(.emailAddress)
+            .autocapitalization(.none)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+    }
+    
+    var passwordTF: some View {
+        Text("")
+            .passwordToggle(placeholder: "Password", text: $viewModel.password, isSecureTextVisible: $showPassword)
+    }
+    
+    var confirmPasswordTF: some View {
+        Text("")
+            .passwordToggle(placeholder: "Confirm Password", text: $viewModel.confirmPassword, isSecureTextVisible: $showConfirmPassword)
+    }
+    
+    var errorMessage: some View {
+        Group {
             if let error = viewModel.registrationError {
                 Text(error.errorDescription ?? "Unknown error").foregroundColor(.red)
             }
-            
+        }
+    }
+    
+    var createAccountButton: some View {
+        Group {
             if viewModel.isLoading {
                 ProgressView()
             } else {
@@ -45,7 +80,11 @@ struct RegistrationView: View {
                 .tint(.blue)
                 .disabled(viewModel.isLoading)
             }
-            
+        }
+    }
+    
+    var navigationLinks: some View {
+        VStack {
             NavigationLink(destination: MainView(), isActive: $viewModel.isEmailVerified) {
                 EmptyView()
             }
@@ -66,13 +105,6 @@ struct RegistrationView: View {
                     viewModel.isLoading = false
                 }
             }
-
-
         }
-        .padding(.bottom, 150)
-        .padding(.horizontal, 20)
-        .navigationTitle("Registration")
     }
-    
 }
-
