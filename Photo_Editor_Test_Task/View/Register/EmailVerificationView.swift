@@ -1,10 +1,11 @@
 
 import SwiftUI
+import Foundation
 
 struct EmailVerificationView: View {
-    let email: String
-    @Binding var errorMessage: String?
-    let onVerifiedPressed: () -> Void
+    var email: String
+    @Binding var error: VerificationError?
+    var onVerifiedPressed: () -> Void
 
     var body: some View {
         VStack(spacing: 24) {
@@ -31,8 +32,8 @@ struct EmailVerificationView: View {
                 .padding(.horizontal)
 
             // red error with verification
-            if let error = errorMessage {
-                Text(error)
+            if let error = error {
+                Text(error.errorDescription ?? "Unknown error")
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
             }
