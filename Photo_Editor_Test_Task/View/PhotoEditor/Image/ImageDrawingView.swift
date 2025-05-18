@@ -12,6 +12,11 @@ struct ImageDrawingView: View {
     var rotation: Angle
     var offset: CGSize
     var onOffsetChange: (CGSize) -> Void
+    
+    @Binding var texts: [TextElement] // ← добавляем!
+    @State private var isDraggingText: Bool = false
+
+    
 
     var body: some View {
         GeometryReader { geo in
@@ -49,17 +54,39 @@ struct ImageDrawingView: View {
                     .frame(width: displaySize.width, height: displaySize.height)
                     .zIndex(10)
                 }
+
+                ForEach($texts) { $text in
+                    Text(text.text)
+                        .font(.custom(text.fontName, size: text.fontSize))
+                        .foregroundColor(text.color)
+                        .padding(4)
+                        .background(Color.black.opacity(0.3))
+                        .cornerRadius(6)
+                        .offset(text.position)
+                        .zIndex(1000)
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    text.position = value.translation
+                                    isDraggingText = true
+                                }
+                                .onEnded { value in
+                                    text.position = value.translation
+                                    isDraggingText = false
+                                }
+                        )
+                }
             }
             .offset(offset)
             .simultaneousGesture(
                 DragGesture()
                     .onChanged { value in
-                        if !isDrawingEnabled {
+                        if !isDrawingEnabled && !isDraggingText {
                             onOffsetChange(value.translation)
                         }
                     }
                     .onEnded { value in
-                        if !isDrawingEnabled {
+                        if !isDrawingEnabled && !isDraggingText {
                             onOffsetChange(value.translation)
                         }
                     }
@@ -67,6 +94,7 @@ struct ImageDrawingView: View {
             .rotationEffect(rotation)
             .frame(maxWidth: .infinity, maxHeight: 350, alignment: .center)
             .clipped()
+
         }
         .frame(height: 350)
         

@@ -2,6 +2,15 @@
 import SwiftUI
 import PencilKit
 
+struct TextElement: Identifiable {
+    let id = UUID()
+    var text: String
+    var fontName: String
+    var fontSize: CGFloat
+    var color: Color
+    var position: CGSize
+}
+
 struct PhotoEditorView: View {
     
     @StateObject private var viewModel = PhotoEditorViewModel()
@@ -9,6 +18,7 @@ struct PhotoEditorView: View {
     @State private var toolPicker = PKToolPicker()
     @State private var showLogoutAlert = false
     @State private var isFilterSelectorPresented = false
+    
     
     var body: some View {
         ZStack {
@@ -49,22 +59,12 @@ struct PhotoEditorView: View {
             }
 
 
-            modalOverlay
-            if isFilterSelectorPresented {
-                Color.black.opacity(0.4)
-                    .edgesIgnoringSafeArea(.all)
-                BottomFilterSelectorView(
-                    filters: viewModel.availableFilters,
-                    onSelectFilter: { filter in
-                        viewModel.applyFilter(filter)
-                    },
-                    onClose: {
-                        withAnimation {
-                            isFilterSelectorPresented = false
-                        }
-                    }
-                )
-            }
+            sourceModalView
+            filtersModalView
+            textEditorModalView
+
+
+
 
         }
         .edgesIgnoringSafeArea(.all)
@@ -90,8 +90,10 @@ private extension PhotoEditorView {
                     offset: viewModel.imageOffset,
                     onOffsetChange: { newOffset in
                         viewModel.imageOffset = newOffset
-                    }
+                    },
+                    texts: $viewModel.texts // ← вот это важно!
                 )
+
             } else {
                 if !viewModel.isSourceSelectorPresented {
                     
@@ -152,8 +154,28 @@ private extension PhotoEditorView {
         }
     }
     
+    var filtersModalView: some View {
+        Group {
+            if isFilterSelectorPresented {
+                Color.black.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                FilterSelectorView(
+                    filters: viewModel.availableFilters,
+                    onSelectFilter: { filter in
+                        viewModel.applyFilter(filter)
+                    },
+                    onClose: {
+                        withAnimation {
+                            isFilterSelectorPresented = false
+                        }
+                    }
+                )
+            }
+        }
+    }
+    
     //MARK: Adding image(Camera or Gallery)
-    var modalOverlay: some View {
+    var sourceModalView: some View {
         Group {
             if viewModel.isSourceSelectorPresented {
                 Color.black.opacity(0.4)
@@ -203,6 +225,15 @@ private extension PhotoEditorView {
 
         // Правая группа кнопок — Pencil и Photo
         ToolbarItemGroup(placement: .navigationBarTrailing) {
+            Button {
+                withAnimation {
+                    viewModel.isTextEditing.toggle()
+                }
+            } label: {
+                Image(systemName: "textformat")
+                    .imageScale(.large)
+            }
+            
             Button(action: {
                 withAnimation {
                     isFilterSelectorPresented = true
@@ -232,4 +263,56 @@ private extension PhotoEditorView {
             }
         }
     }
+    
+    
+    //MARK: - TextEditor
+    var textEditorModalView: some View {
+        Group {
+            if viewModel.isTextEditing {
+                VStack(spacing: 12) {
+                    TextField("Enter text", text: $viewModel.addedText)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+
+                    Slider(value: $viewModel.textFontSize, in: 10...60) {
+                        Text("Size")
+                    }
+
+                    ColorPicker("Text Color", selection: $viewModel.textColor)
+                        .padding(.horizontal)
+
+                    Picker("Font", selection: $viewModel.textFontName) {
+                        Text("Helvetica").tag("HelveticaNeue")
+                        Text("Marker").tag("MarkerFelt-Wide")
+                        Text("Courier").tag("Courier")
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+
+                    Button("Done") {
+                        let newText = TextElement(
+                            text: viewModel.addedText,
+                            fontName: viewModel.textFontName,
+                            fontSize: viewModel.textFontSize,
+                            color: viewModel.textColor,
+                            position: CGSize(width: 0, height: 0) // можно добавить центр, если знаешь размер
+                        )
+                        viewModel.texts.append(newText)
+
+                        viewModel.addedText = ""
+                        viewModel.textPosition = .zero
+                        viewModel.isTextEditing = false
+                    }
+                    .padding()
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(16)
+                .shadow(radius: 10)
+                .padding(.horizontal)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+    }
+
 }

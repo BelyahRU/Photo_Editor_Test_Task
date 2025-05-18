@@ -23,7 +23,15 @@ class PhotoEditorViewModel: ObservableObject {
     @Published var isPickerPresented = false
     @Published var pickerSource: UIImagePickerController.SourceType = .photoLibrary
     
+    @Published var texts: [TextElement] = []
     
+    @Published var addedText: String = "Your text"
+    @Published var textColor: Color = .white
+    @Published var textFontSize: CGFloat = 24
+    @Published var textFontName: String = "HelveticaNeue"
+    @Published var isTextEditing: Bool = false
+    @Published var textPosition: CGSize = .zero
+
     
     private var appState = AppStateService.shared
     
