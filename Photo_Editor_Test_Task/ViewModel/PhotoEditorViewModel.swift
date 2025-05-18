@@ -5,6 +5,16 @@ class PhotoEditorViewModel: ObservableObject {
     @Published var selectedImage: UIImage?
     @Published var scale: CGFloat = 1.0 // масштаб
     @Published var rotation: Angle = .zero // поворот
+    @Published var imageOffset: CGSize = .zero
+
+    
+    var imageSize: CGSize {
+        selectedImage?.size ?? .zero
+    }
+
+    //MARK: - PencilKit
+    @Published var isDrawing = false
+    
     
     //MARK: - UIImagePickerController
     @Published var isPickerPresented = false
@@ -19,6 +29,7 @@ class PhotoEditorViewModel: ObservableObject {
     func resetEdits() {
         scale = 1.0
         rotation = .zero
+        imageOffset = .zero
     }
 }
 

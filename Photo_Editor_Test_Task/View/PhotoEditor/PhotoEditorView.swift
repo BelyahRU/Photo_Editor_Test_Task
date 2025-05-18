@@ -1,8 +1,11 @@
 
 import SwiftUI
+import PencilKit
 
 struct PhotoEditorView: View {
     @StateObject private var viewModel = PhotoEditorViewModel()
+    @State private var canvasView = PKCanvasView()
+    @State private var toolPicker = PKToolPicker()
     
     var body: some View {
         VStack {
@@ -12,8 +15,20 @@ struct PhotoEditorView: View {
             
             scaleAndRotationSettings
         }
-        .navigationTitle("Photo Editor")
         .edgesIgnoringSafeArea(.all)
+        .navigationBarTitle("Photo Editor", displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    withAnimation {
+                        viewModel.isDrawing.toggle()
+                    }
+                }) {
+                    Image(systemName: viewModel.isDrawing ? "pencil.circle.fill" : "pencil")
+                        .imageScale(.large)
+                }
+            }
+        }
         // Sheet for Gallery
         .sheet(isPresented: Binding(get: {
                     viewModel.isPickerPresented && viewModel.pickerSource == .photoLibrary
@@ -39,18 +54,24 @@ struct PhotoEditorView: View {
 }
 
 
+
 private extension PhotoEditorView {
     
     var userImage: some View {
         Group {
             if let image = viewModel.selectedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .scaleEffect(viewModel.scale) // масштаб
-                    .rotationEffect(viewModel.rotation) // поворот
-                    .frame(maxHeight: 400)
-                    .padding()
+                ImageDrawingView(
+                    image: image,
+                    canvasView: canvasView,
+                    toolPicker: toolPicker,
+                    isDrawingEnabled: viewModel.isDrawing,
+                    scale: viewModel.scale,
+                    rotation: viewModel.rotation,
+                    offset: viewModel.imageOffset,
+                    onOffsetChange: { newOffset in
+                        viewModel.imageOffset = newOffset
+                    }
+                )
             } else {
                 Text("Select Image")
                     .foregroundColor(.gray)
@@ -58,6 +79,8 @@ private extension PhotoEditorView {
             }
         }
     }
+
+
     
     var sourceButtons: some View {
         VStack {
@@ -90,11 +113,16 @@ private extension PhotoEditorView {
                 }
                 .padding(.horizontal, 20)
 
-                Button("Reset") {
-                    viewModel.resetEdits()
+                HStack {
+                    Button("Reset") {
+                        viewModel.resetEdits()
+                    }
+
                 }
                 .padding()
             }
         }
     }
 }
+
+
