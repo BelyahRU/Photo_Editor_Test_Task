@@ -26,7 +26,7 @@ struct Photo_Editor_Test_TaskApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationView {
-                AuthView()
+                PhotoEditorView()
             }
         }
     }
