@@ -89,7 +89,7 @@ private extension RegistrationView {
     
     var navigationLinks: some View {
         VStack {
-            NavigationLink(destination: MainView(), isActive: $viewModel.isEmailVerified) {
+            NavigationLink(destination: PhotoEditorView(), isActive: $viewModel.isEmailVerified) {
                 EmptyView()
             }
             

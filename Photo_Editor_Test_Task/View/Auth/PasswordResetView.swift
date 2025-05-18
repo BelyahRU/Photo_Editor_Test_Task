@@ -31,7 +31,7 @@ struct PasswordResetView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             // i dont know why, but view is lower then center
-            .position(CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2 - 300))
+            .position(CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2 - 200))
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {

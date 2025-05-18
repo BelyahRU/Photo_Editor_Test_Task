@@ -20,6 +20,8 @@ final class RegistrationViewModel: ObservableObject {
     @Published var registrationError: RegistrationError?
     @Published var verificationError: VerificationError?
     
+    private var appState = AppStateService.shared
+    
     private let validator = ValidationService()
 
     init() {
@@ -94,6 +96,7 @@ final class RegistrationViewModel: ObservableObject {
                     isEmailVerified = true
                     isVerificationSent = false
                     verificationError = nil
+                    appState.isLoggedIn = true
                 } else {
                     verificationError = .emailNotVerifiedYet
                 }

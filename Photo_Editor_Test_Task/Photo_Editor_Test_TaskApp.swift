@@ -22,11 +22,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct Photo_Editor_Test_TaskApp: App {
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject private var appState = AppStateService.shared
 
     var body: some Scene {
         WindowGroup {
             NavigationView {
-                PhotoEditorView()
+                if appState.isLoggedIn {
+                    PhotoEditorView()
+                        .environmentObject(appState)
+                } else {
+                    
+                    AuthView()
+                        .environmentObject(appState)
+                }
             }
         }
     }

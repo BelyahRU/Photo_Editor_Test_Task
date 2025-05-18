@@ -19,6 +19,8 @@ final class AuthViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isSignedIn: Bool = false
     @Published var isResetPasswordPresented = false
+    
+    private var appState = AppStateService.shared
 
     private let validator = ValidationService()
     
@@ -46,6 +48,7 @@ final class AuthViewModel: ObservableObject {
             }
 
             print("User logged in: \(authResult.user.uid)")
+            appState.isLoggedIn = true
             isSignedIn = true
         } catch let error as NSError {
             switch error.code {

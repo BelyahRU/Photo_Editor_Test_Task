@@ -69,6 +69,6 @@ struct ImageDrawingView: View {
             .clipped()
         }
         .frame(height: 350)
-        .padding()
+        
     }
 }

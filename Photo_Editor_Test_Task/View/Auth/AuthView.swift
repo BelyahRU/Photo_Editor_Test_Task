@@ -9,9 +9,9 @@ struct AuthView: View {
 
     //MARK: - Content
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .bottom) {
+        ZStack(alignment: .center) {
                 VStack(spacing: 16) {
+                    Spacer()
                     header
                     
                     emailTF
@@ -26,7 +26,7 @@ struct AuthView: View {
                     
                     Spacer()
                 }
-                .padding()
+                .padding(.horizontal, 20)
                 .overlay {
                     if viewModel.isResetPasswordPresented {
                         Color.black.opacity(0.4).ignoresSafeArea()
@@ -39,7 +39,7 @@ struct AuthView: View {
             }
             .navigationTitle("Login")
         }
-    }
+    
 }
 
 // MARK: - Private Views
