@@ -1,16 +1,14 @@
 
-
 import SwiftUI
 import PencilKit
 
 struct PhotoEditorView: View {
     
-    
     @StateObject private var viewModel = PhotoEditorViewModel()
     @State private var canvasView = PKCanvasView()
     @State private var toolPicker = PKToolPicker()
     @State private var showLogoutAlert = false
-
+    @State private var isFilterSelectorPresented = false
     
     var body: some View {
         ZStack {
@@ -21,37 +19,7 @@ struct PhotoEditorView: View {
             }
             .navigationBarTitle("Photo Editor")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: {
-                            showLogoutAlert = true
-                            
-                        }) {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .imageScale(.large)
-                                .foregroundStyle(.red)
-                        }
-                    }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        withAnimation {
-                            viewModel.isDrawing.toggle()
-                        }
-                    }) {
-                        Image(systemName: viewModel.isDrawing ? "pencil.circle.fill" : "pencil")
-                            .imageScale(.large)
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        withAnimation {
-                            viewModel.isSourceSelectorPresented = true
-                        }
-                    }) {
-                        Image(systemName: "photo")
-                            .imageScale(.large)
-                    }
-                }
+                photoEditorToolbar
             }
             .fullScreenCover(isPresented: Binding(get: {
                     viewModel.isPickerPresented && viewModel.pickerSource == .photoLibrary
@@ -80,32 +48,24 @@ struct PhotoEditorView: View {
                 Button("Cancel", role: .cancel) { }
             }
 
-            // Здесь добавляем наше кастомное меню
-            if viewModel.isSourceSelectorPresented {
+
+            modalOverlay
+            if isFilterSelectorPresented {
                 Color.black.opacity(0.4)
                     .edgesIgnoringSafeArea(.all)
-                BottomSourceSelectorView(
-                    onSelectGallery: {
-                        viewModel.openPicker(source: .photoLibrary)
-                        withAnimation {
-                            viewModel.isSourceSelectorPresented = false
-                        }
-                    },
-                    onSelectCamera: {
-                        viewModel.openPicker(source: .camera)
-                        withAnimation {
-                            viewModel.isSourceSelectorPresented = false
-                        }
+                BottomFilterSelectorView(
+                    filters: viewModel.availableFilters,
+                    onSelectFilter: { filter in
+                        viewModel.applyFilter(filter)
                     },
                     onClose: {
                         withAnimation {
-                            viewModel.isSourceSelectorPresented = false
+                            isFilterSelectorPresented = false
                         }
                     }
                 )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-
             }
+
         }
         .edgesIgnoringSafeArea(.all)
         .navigationBarBackButtonHidden(true)
@@ -116,6 +76,7 @@ struct PhotoEditorView: View {
 
 private extension PhotoEditorView {
     
+    //MARK: - Image from gallery or camera
     var userImage: some View {
         Group {
             if let image = viewModel.selectedImage {
@@ -133,6 +94,7 @@ private extension PhotoEditorView {
                 )
             } else {
                 if !viewModel.isSourceSelectorPresented {
+                    
                     VStack(spacing: 12) {
                         Image(systemName: "photo")
                             .resizable()
@@ -152,26 +114,33 @@ private extension PhotoEditorView {
         }
     }
     
+    //MARK: - Sliders(Scale and Rotation)
+    var scaleSlider: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("Scale")
+            
+            Slider(value: $viewModel.scale, in: 0.5...3.0) {}
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    var rotationSlider: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("Rotation")
+            
+            Slider(value: Binding(
+                get: { viewModel.rotation.degrees },
+                set: { viewModel.rotation = .degrees($0) }
+            ), in: -180...180) {}
+        }
+        .padding(.horizontal, 20)
+    }
+    
     var scaleAndRotationSettings: some View {
         Group {
             if viewModel.selectedImage != nil {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Scale")
-                    
-                    Slider(value: $viewModel.scale, in: 0.5...3.0) {}
-                }
-                .padding(.horizontal, 20)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Rotation")
-                    
-                    Slider(value: Binding(
-                        get: { viewModel.rotation.degrees },
-                        set: { viewModel.rotation = .degrees($0) }
-                    ), in: -180...180) {}
-                }
-                .padding(.horizontal, 20)
-
+                scaleSlider
+                rotationSlider
                 HStack {
                     Button("Reset") {
                         viewModel.resetEdits()
@@ -182,5 +151,85 @@ private extension PhotoEditorView {
             }
         }
     }
-}
+    
+    //MARK: Adding image(Camera or Gallery)
+    var modalOverlay: some View {
+        Group {
+            if viewModel.isSourceSelectorPresented {
+                Color.black.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                SourceSelectorView(
+                    // Gallery
+                    onSelectGallery: {
+                        viewModel.openPicker(source: .photoLibrary)
+                        withAnimation {
+                            viewModel.isSourceSelectorPresented = false
+                        }
+                    },
+                    // Camera
+                    onSelectCamera: {
+                        viewModel.openPicker(source: .camera)
+                        withAnimation {
+                            viewModel.isSourceSelectorPresented = false
+                        }
+                    },
+                    // Dismiss
+                    onClose: {
+                        withAnimation {
+                            viewModel.isSourceSelectorPresented = false
+                        }
+                    }
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
 
+            }
+        }
+    }
+    
+    
+    //MARK: - ToolBar Content
+    @ToolbarContentBuilder
+    var photoEditorToolbar: some ToolbarContent {
+        // Левая кнопка — Log Out
+        ToolbarItem(placement: .navigationBarLeading) {
+            Button(action: {
+                showLogoutAlert = true
+            }) {
+                Image(systemName: "rectangle.portrait.and.arrow.right")
+                    .imageScale(.large)
+                    .foregroundStyle(.red)
+            }
+        }
+
+        // Правая группа кнопок — Pencil и Photo
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            Button(action: {
+                withAnimation {
+                    isFilterSelectorPresented = true
+                }
+            }) {
+                Image(systemName: "wand.and.stars")
+                    .imageScale(.large)
+            }
+
+
+            Button(action: {
+                withAnimation {
+                    viewModel.isDrawing.toggle()
+                }
+            }) {
+                Image(systemName: viewModel.isDrawing ? "pencil.circle.fill" : "pencil")
+                    .imageScale(.large)
+            }
+
+            Button(action: {
+                withAnimation {
+                    viewModel.isSourceSelectorPresented = true
+                }
+            }) {
+                Image(systemName: "photo")
+                    .imageScale(.large)
+            }
+        }
+    }
+}

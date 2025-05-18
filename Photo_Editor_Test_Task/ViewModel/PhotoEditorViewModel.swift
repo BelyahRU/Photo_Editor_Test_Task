@@ -1,6 +1,8 @@
 
 import SwiftUI
 import FirebaseAuth
+import CoreImage
+import CoreImage.CIFilterBuiltins
 
 class PhotoEditorViewModel: ObservableObject {
     @Published var selectedImage: UIImage?
@@ -21,7 +23,32 @@ class PhotoEditorViewModel: ObservableObject {
     @Published var isPickerPresented = false
     @Published var pickerSource: UIImagePickerController.SourceType = .photoLibrary
     
+    
+    
     private var appState = AppStateService.shared
+    
+    private let context = CIContext()
+    let availableFilters: [(name: String, filter: CIFilter)] = [
+        ("Sepia", CIFilter.sepiaTone()),
+        ("Mono", CIFilter.photoEffectMono()),
+        ("Noir", CIFilter.photoEffectNoir()),
+        ("Invert", CIFilter.colorInvert()),
+        ("Fade", CIFilter.photoEffectFade())
+    ]
+
+        
+    func applyFilter(_ filter: CIFilter) {
+        guard let originalImage = selectedImage,
+              let cgImage = originalImage.cgImage else { return }
+
+        let ciImage = CIImage(cgImage: cgImage)
+        filter.setValue(ciImage, forKey: kCIInputImageKey)
+
+        if let outputImage = filter.outputImage,
+           let cgimg = context.createCGImage(outputImage, from: outputImage.extent) {
+            selectedImage = UIImage(cgImage: cgimg)
+        }
+    }
     
     func openPicker(source: UIImagePickerController.SourceType) {
         pickerSource = source
