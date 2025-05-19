@@ -3,43 +3,40 @@ import SwiftUI
 import FirebaseAuth
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import PencilKit
+
 
 class PhotoEditorViewModel: ObservableObject {
+    // MARK: - Image State
     @Published var selectedImage: UIImage?
-    @Published var scale: CGFloat = 1.0 // масштаб
-    @Published var rotation: Angle = .zero // поворот
+    @Published var scale: CGFloat = 1.0
+    @Published var rotation: Angle = .zero
     @Published var imageOffset: CGSize = .zero
-    @Published var isDraggingTextNow: Bool = false
 
     var imageSize: CGSize {
         selectedImage?.size ?? .zero
     }
-    
-    @Published var isSourceSelectorPresented = false
 
-    //MARK: - PencilKit
-    @Published var isDrawing = false
-    
-    
-    //MARK: - UIImagePickerController
+    // MARK: - UI State
+    @Published var isSourceSelectorPresented = false
     @Published var isPickerPresented = false
     @Published var pickerSource: UIImagePickerController.SourceType = .photoLibrary
-    
+    @Published var isExportMenuPresented = false
+    @Published var isDrawing = false
+    @Published var showLogoutAlert = false
+
+    // MARK: - Text Editing
     @Published var texts: [TextElement] = []
-    
     @Published var addedText: String = "Your text"
     @Published var textColor: Color = .white
     @Published var textFontSize: CGFloat = 24
     @Published var textFontName: String = "HelveticaNeue"
     @Published var isTextEditing: Bool = false
     @Published var textPosition: CGSize = .zero
-    
     @Published var editingTextID: UUID? = nil
+    @Published var isDraggingTextNow: Bool = false
 
-
-    
-    private var appState = AppStateService.shared
-    
+    // MARK: - Filters
     private let context = CIContext()
     let availableFilters: [(name: String, filter: CIFilter)] = [
         ("Sepia", CIFilter.sepiaTone()),
@@ -49,7 +46,13 @@ class PhotoEditorViewModel: ObservableObject {
         ("Fade", CIFilter.photoEffectFade())
     ]
 
-        
+    // MARK: - Dependencies
+    private var appState = AppStateService.shared
+    
+    @Published var canvasView = PKCanvasView()
+
+
+    // MARK: - Actions
     func applyFilter(_ filter: CIFilter) {
         guard let originalImage = selectedImage,
               let cgImage = originalImage.cgImage else { return }
@@ -62,19 +65,18 @@ class PhotoEditorViewModel: ObservableObject {
             selectedImage = UIImage(cgImage: cgimg)
         }
     }
-    
+
     func openPicker(source: UIImagePickerController.SourceType) {
         pickerSource = source
         isPickerPresented = true
     }
 
-    //set standart rotation and scale
     func resetEdits() {
         scale = 1.0
         rotation = .zero
         imageOffset = .zero
     }
-    
+
     func logOut() {
         do {
             try Auth.auth().signOut()
@@ -84,4 +86,3 @@ class PhotoEditorViewModel: ObservableObject {
         }
     }
 }
-

@@ -1,4 +1,3 @@
-
 import SwiftUI
 import PencilKit
 
@@ -13,14 +12,14 @@ struct ImageDrawingView: View {
     var offset: CGSize
     var viewModel: PhotoEditorViewModel
     var onOffsetChange: (CGSize) -> Void
-    
+
     @Binding var texts: [TextElement]
 
     var body: some View {
         GeometryReader { geo in
             let containerSize = geo.size
             let imageSize = image.size
-            
+
             let scaleFactor = min(
                 containerSize.width / imageSize.width,
                 containerSize.height / imageSize.height
@@ -29,6 +28,11 @@ struct ImageDrawingView: View {
             let displaySize = CGSize(
                 width: imageSize.width * scaleFactor * scale,
                 height: imageSize.height * scaleFactor * scale
+            )
+
+            let imageOrigin = CGPoint(
+                x: (containerSize.width - displaySize.width) / 2,
+                y: (containerSize.height - displaySize.height) / 2
             )
 
             ZStack {
@@ -52,20 +56,18 @@ struct ImageDrawingView: View {
                     .frame(width: displaySize.width, height: displaySize.height)
                     .zIndex(10)
                 }
-                
+
                 ForEach($texts) { $text in
-                    let scaledPosition = CGSize(
-                        width: text.position.width * scale,
-                        height: text.position.height * scale
-                    )
-                    
+                    let displayX = text.position.width * scale
+                    let displayY = text.position.height * scale
+
                     Text(text.text)
-                        .font(.custom(text.fontName, size: text.fontSize * scale)) // ← Масштабируем fontSize
+                        .font(.custom(text.fontName, size: text.fontSize * scale))
                         .foregroundColor(text.color)
                         .padding(4)
                         .background(Color.black.opacity(0.3))
                         .cornerRadius(6)
-                        .offset(scaledPosition) // ← Масштабируем позицию
+                        .position(x: imageOrigin.x + displayX, y: imageOrigin.y + displayY)
                         .zIndex(1000)
                         .gesture(
                             TapGesture(count: 2)
@@ -82,11 +84,17 @@ struct ImageDrawingView: View {
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
-                                    text.position = value.translation
+                                    let relativeX = (value.location.x - imageOrigin.x)
+                                    let relativeY = (value.location.y - imageOrigin.y)
+
+                                    text.position = CGSize(width: relativeX, height: relativeY)
                                     viewModel.isDraggingTextNow = true
                                 }
                                 .onEnded { value in
-                                    text.position = value.translation
+                                    let relativeX = (value.location.x - imageOrigin.x)
+                                    let relativeY = (value.location.y - imageOrigin.y)
+
+                                    text.position = CGSize(width: relativeX, height: relativeY)
                                     viewModel.isDraggingTextNow = false
                                 }
                         )

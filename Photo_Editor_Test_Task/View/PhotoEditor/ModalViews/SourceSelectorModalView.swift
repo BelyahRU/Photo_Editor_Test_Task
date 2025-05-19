@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SourceSelectorView: View {
+struct SourceSelectorModalView: View {
     var onSelectGallery: () -> Void
     var onSelectCamera: () -> Void
     var onClose: () -> Void
