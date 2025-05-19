@@ -1,5 +1,6 @@
 import SwiftUI
 
+//MARK: - Allows you to select a source (gallery or photo)
 struct SourceSelectorModalView: View {
     var onSelectGallery: () -> Void
     var onSelectCamera: () -> Void
@@ -9,7 +10,6 @@ struct SourceSelectorModalView: View {
 
     var body: some View {
         ZStack {
-            // Прозрачный фон с возможностью закрытия
             Color.clear
                 .ignoresSafeArea()
                 .onTapGesture {
@@ -23,6 +23,7 @@ struct SourceSelectorModalView: View {
                     .padding(.top)
 
                 HStack(spacing: 40) {
+                    //MARK: - Gallery
                     VStack(spacing: 8) {
                         Button(action: {
                             onSelectGallery()
@@ -42,7 +43,8 @@ struct SourceSelectorModalView: View {
                             .foregroundColor(.black)
                             .font(.subheadline)
                     }
-
+                    
+                    //MARK: - Camera
                     VStack(spacing: 8) {
                         Button(action: {
                             onSelectCamera()

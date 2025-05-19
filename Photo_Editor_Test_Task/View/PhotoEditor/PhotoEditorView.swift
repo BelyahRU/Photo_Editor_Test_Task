@@ -2,11 +2,9 @@
 import SwiftUI
 import PencilKit
 
+//MARK: - Photo Editor Screen
 struct PhotoEditorView: View {
-    
     @StateObject private var viewModel = PhotoEditorViewModel()
-    @State private var isFilterSelectorPresented = false
-    
     
     var body: some View {
         ZStack {
@@ -18,13 +16,15 @@ struct PhotoEditorView: View {
             .navigationBarTitle("Photo Editor")
             .toolbar {
                 ToolbarView(
+                    isImageLoaded: viewModel.selectedImage != nil,
                     isExportMenuPresented: $viewModel.isExportMenuPresented,
                     isTextEditing: $viewModel.isTextEditing,
-                    isFilterSelectorPresented: $isFilterSelectorPresented,
+                    isFilterSelectorPresented: $viewModel.isFilterSelectorPresented,
                     isSourceSelectorPresented: $viewModel.isSourceSelectorPresented,
                     showLogoutAlert: $viewModel.showLogoutAlert,
                     isDrawing: $viewModel.isDrawing
                 )
+
             }
             .fullScreenCover(isPresented: $viewModel.isPickerPresented) {
                 Group {
@@ -67,17 +67,17 @@ private extension PhotoEditorView {
     //MARK: - FilterSelectorView
     var filtersModalView: some View {
         Group {
-            if isFilterSelectorPresented {
+            if viewModel.isFilterSelectorPresented {
                 Color.black.opacity(0.4)
                     .edgesIgnoringSafeArea(.all)
-                FilterSelectorView(
+                FilterSelectorModalView(
                     filters: viewModel.availableFilters,
                     onSelectFilter: { filter in
                         viewModel.applyFilter(filter)
                     },
                     onClose: {
                         withAnimation {
-                            isFilterSelectorPresented = false
+                            viewModel.isFilterSelectorPresented = false
                         }
                     }
                 )

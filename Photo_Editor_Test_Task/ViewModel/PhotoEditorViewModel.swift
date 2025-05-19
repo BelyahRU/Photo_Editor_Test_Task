@@ -12,13 +12,13 @@ final class PhotoEditorViewModel: ObservableObject {
     @Published var scale: CGFloat = 1.0
     @Published var rotation: Angle = .zero
     @Published var imageOffset: CGSize = .zero
-
     var imageSize: CGSize {
         selectedImage?.size ?? .zero
     }
 
     // MARK: - UI State
     @Published var isSourceSelectorPresented = false
+    @Published var isFilterSelectorPresented = false
     @Published var isPickerPresented = false
     @Published var pickerSource: UIImagePickerController.SourceType = .photoLibrary
     @Published var isExportMenuPresented = false
@@ -49,6 +49,7 @@ final class PhotoEditorViewModel: ObservableObject {
     // MARK: - Dependencies
     private var appState = AppStateService.shared
     
+    //MARK: - Pencil
     @Published var canvasView = PKCanvasView()
 
 

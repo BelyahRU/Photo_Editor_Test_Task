@@ -2,7 +2,8 @@
 import SwiftUI
 import CoreImage.CIFilterBuiltins
 
-struct FilterSelectorView: View {
+//MARK: - CoreImage filters
+struct FilterSelectorModalView: View {
     let filters: [(name: String, filter: CIFilter)]
     var onSelectFilter: (_ filter: CIFilter) -> Void
     var onClose: () -> Void

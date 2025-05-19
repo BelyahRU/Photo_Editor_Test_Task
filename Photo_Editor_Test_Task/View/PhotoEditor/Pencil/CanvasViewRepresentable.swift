@@ -2,6 +2,7 @@
 import SwiftUI
 import PencilKit
 
+//MARK: - PencilKit configuration
 struct CanvasViewRepresentable: UIViewRepresentable {
     @Binding var canvasView: PKCanvasView
     @Binding var toolPicker: PKToolPicker
@@ -12,7 +13,7 @@ struct CanvasViewRepresentable: UIViewRepresentable {
         canvasView.drawingPolicy = .anyInput
         canvasView.backgroundColor = .clear
         canvasView.isOpaque = false
-        canvasView.drawing = canvasView.drawing // ensure it's retained
+        canvasView.drawing = canvasView.drawing 
 
         configureToolPicker(for: canvasView)
         canvasView.isUserInteractionEnabled = isDrawingEnabled

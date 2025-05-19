@@ -1,6 +1,7 @@
 
 import SwiftUI
 
+//MARK: - Custom View for creating text
 struct TextEditorModalView: View {
     var selectedImage: UIImage?
     @Binding var isPresented: Bool
@@ -15,11 +16,14 @@ struct TextEditorModalView: View {
     var body: some View {
         if isPresented {
             VStack(spacing: 12) {
+                //MARK: - TextField
                 TextField("Enter text", text: $addedText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
-                    .font(.custom(textFontName, size: textFontSize)) // ← Текст того же размера, что и выбранный пользователем
+                    .foregroundStyle(textColor == .white ? .black : textColor)
+                    .font(.custom(textFontName, size: textFontSize))
                 
+                //MARK: - Font Slider
                 Slider(value: $textFontSize, in: 10...60, step: 1) {
                     Text("Size")
                 } minimumValueLabel: {
@@ -28,9 +32,11 @@ struct TextEditorModalView: View {
                     Text("60")
                 }
                 
+                //MARK: - Font Color picker
                 ColorPicker("Text Color", selection: $textColor)
                     .padding(.horizontal)
                 
+                //MARK: - Font Picker
                 Picker("Font", selection: $textFontName) {
                     Text("Helvetica").tag("HelveticaNeue")
                     Text("Marker").tag("MarkerFelt-Wide")
@@ -38,6 +44,7 @@ struct TextEditorModalView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
+                
                 
                 HStack {
                     Button("Delete") {

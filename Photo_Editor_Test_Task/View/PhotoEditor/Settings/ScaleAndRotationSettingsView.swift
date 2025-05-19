@@ -1,7 +1,7 @@
 
 import SwiftUI
 
-
+//MARK: - Struct which controlls scale and rotation settings
 struct ScaleAndRotationSettingsView: View {
     @ObservedObject var viewModel: PhotoEditorViewModel
 
@@ -9,11 +9,11 @@ struct ScaleAndRotationSettingsView: View {
         Group {
             if viewModel.selectedImage != nil {
                 VStack(alignment: .leading, spacing: 3) {
-                    // Слайдер масштабирования
+                    //MARK: - Scale slider
                     Text("Scale")
                     Slider(value: $viewModel.scale, in: 0.5...3.0) { _ in }
 
-                    // Слайдер поворота
+                    //MARK: - Rotation slider
                     Text("Rotation")
                     Slider(
                         value: Binding(
@@ -25,7 +25,7 @@ struct ScaleAndRotationSettingsView: View {
                 }
                 .padding(.horizontal, 20)
 
-                // Кнопка Reset
+                //MARK: - Reset button
                 Button("Reset") {
                     viewModel.resetEdits()
                 }
