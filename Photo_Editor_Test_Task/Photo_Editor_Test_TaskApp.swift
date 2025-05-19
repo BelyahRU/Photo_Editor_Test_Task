@@ -31,7 +31,6 @@ struct Photo_Editor_Test_TaskApp: App {
                     PhotoEditorView()
                         .environmentObject(appState)
                 } else {
-                    
                     AuthView()
                         .environmentObject(appState)
                 }

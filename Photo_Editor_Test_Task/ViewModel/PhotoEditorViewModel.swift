@@ -4,7 +4,7 @@ import FirebaseAuth
 import CoreImage
 import CoreImage.CIFilterBuiltins
 import PencilKit
-
+import Combine
 
 final class PhotoEditorViewModel: ObservableObject {
     // MARK: - Image State
@@ -12,9 +12,17 @@ final class PhotoEditorViewModel: ObservableObject {
     @Published var scale: CGFloat = 1.0
     @Published var rotation: Angle = .zero
     @Published var imageOffset: CGSize = .zero
-    var imageSize: CGSize {
-        selectedImage?.size ?? .zero
+    
+    @Published private(set) var imageSize: CGSize = .zero
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        $selectedImage
+            .compactMap { $0?.size }
+            .assign(to: \.imageSize, on: self)
+            .store(in: &cancellables)
     }
+
 
     // MARK: - UI State
     @Published var isSourceSelectorPresented = false
