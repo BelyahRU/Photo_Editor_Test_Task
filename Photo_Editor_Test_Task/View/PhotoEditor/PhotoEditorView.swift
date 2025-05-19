@@ -268,70 +268,16 @@ private extension PhotoEditorView {
     
     //MARK: - TextEditor
     var textEditorModalView: some View {
-        Group {
-            if viewModel.isTextEditing {
-                VStack(spacing: 12) {
-                    TextField("Enter text", text: $viewModel.addedText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    Slider(value: $viewModel.textFontSize, in: 10...60) {
-                        Text("Size")
-                    }
-
-                    ColorPicker("Text Color", selection: $viewModel.textColor)
-                        .padding(.horizontal)
-
-                    Picker("Font", selection: $viewModel.textFontName) {
-                        Text("Helvetica").tag("HelveticaNeue")
-                        Text("Marker").tag("MarkerFelt-Wide")
-                        Text("Courier").tag("Courier")
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal)
-
-                    HStack {
-                        Button("Delete") {
-                            if let id = viewModel.editingTextID {
-                                viewModel.texts.removeAll { $0.id == id }
-                            }
-                            resetTextEditor()
-                        }
-                        .foregroundColor(.red)
-
-                        Spacer()
-
-                        Button("Done") {
-                            if let id = viewModel.editingTextID,
-                               let index = viewModel.texts.firstIndex(where: { $0.id == id }) {
-                                viewModel.texts[index].text = viewModel.addedText
-                                viewModel.texts[index].color = viewModel.textColor
-                                viewModel.texts[index].fontSize = viewModel.textFontSize
-                                viewModel.texts[index].fontName = viewModel.textFontName
-                                viewModel.texts[index].position = viewModel.textPosition
-                            } else {
-                                let newText = TextElement(
-                                    text: viewModel.addedText,
-                                    fontName: viewModel.textFontName,
-                                    fontSize: viewModel.textFontSize,
-                                    color: viewModel.textColor,
-                                    position: .zero
-                                )
-                                viewModel.texts.append(newText)
-                            }
-                            resetTextEditor()
-                        }
-                    }
-                    .padding()
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(16)
-                .shadow(radius: 10)
-                .padding(.horizontal)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
+        TextEditorModalView(
+            isPresented: $viewModel.isTextEditing,
+            addedText: $viewModel.addedText,
+            textColor: $viewModel.textColor,
+            textFontSize: $viewModel.textFontSize,
+            textFontName: $viewModel.textFontName,
+            textPosition: $viewModel.textPosition,
+            editingTextID: $viewModel.editingTextID,
+            texts: $viewModel.texts
+        )
     }
 
     func resetTextEditor() {
