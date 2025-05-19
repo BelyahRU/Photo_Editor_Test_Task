@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct TextEditorModalView: View {
+    var selectedImage: UIImage?
     @Binding var isPresented: Bool
     @Binding var addedText: String
     @Binding var textColor: Color
@@ -67,27 +68,47 @@ struct TextEditorModalView: View {
     
     private func saveText() {
         guard !addedText.isEmpty else { return }
-        
+
         if let id = editingTextID,
            let index = texts.firstIndex(where: { $0.id == id }) {
-            // Обновляем существующий текст
+            // Обновление текста
             texts[index].text = addedText
             texts[index].color = textColor
             texts[index].fontSize = textFontSize
             texts[index].fontName = textFontName
             texts[index].position = textPosition
         } else {
-            // Добавляем новый текст
+            // Центр изображения по отображаемому размеру
+            let screenWidth = UIScreen.main.bounds.width
+            let imageHeight: CGFloat = 350
+
+            let scaleFactor = min(
+                screenWidth / (selectedImage?.size.width ?? 1),
+                imageHeight / (selectedImage?.size.height ?? 1)
+            )
+
+            let displaySize = CGSize(
+                width: (selectedImage?.size.width ?? 1) * scaleFactor,
+                height: (selectedImage?.size.height ?? 1) * scaleFactor
+            )
+
+            let centerPosition = CGSize(
+                width: displaySize.width / 2,
+                height: displaySize.height / 2
+            )
+
             let newText = TextElement(
                 text: addedText,
                 fontName: textFontName,
                 fontSize: textFontSize,
                 color: textColor,
-                position: .zero
+                position: centerPosition
             )
+
             texts.append(newText)
         }
     }
+
     
     private func reset() {
         addedText = ""

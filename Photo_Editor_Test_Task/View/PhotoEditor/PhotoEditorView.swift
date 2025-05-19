@@ -204,6 +204,7 @@ private extension PhotoEditorView {
     //MARK: - TextEditorModalView
     var textEditorModalView: some View {
         TextEditorModalView(
+            selectedImage: viewModel.selectedImage, // ← вот это добавили
             isPresented: $viewModel.isTextEditing,
             addedText: $viewModel.addedText,
             textColor: $viewModel.textColor,
@@ -213,6 +214,7 @@ private extension PhotoEditorView {
             editingTextID: $viewModel.editingTextID,
             texts: $viewModel.texts
         )
+
     }
     
     //MARK: - ExportMenuView

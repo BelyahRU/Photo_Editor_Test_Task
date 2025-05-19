@@ -6,10 +6,10 @@ struct ExportMenuView: View {
     var onClose: () -> Void
 
     @State private var showContent = false
+    @State private var selectedFormat: ExportFormat = .png
 
     var body: some View {
         ZStack {
-            // Прозрачный фон для закрытия по клику
             Color.clear
                 .ignoresSafeArea()
                 .onTapGesture {
@@ -22,47 +22,71 @@ struct ExportMenuView: View {
                     .bold()
                     .padding(.top)
 
-                // Сохранить в фотоальбом
-                HStack(spacing: 16) {
+                VStack(spacing: 16) {
                     Button(action: {
                         onSaveToPhotos()
                         hideWithAnimation()
                     }) {
-                        Image(systemName: "photo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 36, height: 36)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.green)
-                            .clipShape(Circle())
-                        Text("Save to Photos")
-                            .foregroundColor(.black)
-                            .font(.subheadline)
+                        HStack(spacing: 12) {
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 28, height: 28)
+                                .foregroundColor(.white)
+                                .background(Circle().fill(Color.green).frame(width: 40, height: 40))
+                            Text("Save to Photos")
+                                .foregroundColor(.black)
+                                .font(.body)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                     }
+                    Divider()
+                    HStack(spacing: 12) {
+                        Button(action: {
+                            onExport(selectedFormat)
+                            hideWithAnimation()
+                        }) {
+                            HStack(spacing: 12) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 28, height: 28)
+                                    .foregroundColor(.white)
+                                    .background(Circle().fill(Color.blue).frame(width: 40, height: 40))
+                                Text("Export")
+                                    .foregroundColor(.black)
+                                    .font(.body)
+                            }
+                        }
+
+                        Menu {
+                            ForEach(ExportFormat.allCases, id: \.self) { format in
+                                Button {
+                                    selectedFormat = format
+                                } label: {
+                                    Text(format.rawValue)
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Text(selectedFormat.rawValue)
+                                    .foregroundColor(.blue)
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.blue)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(.horizontal)
                 }
 
-                // Экспорт (поделись, отправь в соцсети)
-                HStack(spacing: 16) {
-                    Button(action: {
-                        onExport(.png)
-                        hideWithAnimation()
-                    }) {
-                        Image(systemName: "square.and.arrow.up")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 36, height: 36)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.blue)
-                            .clipShape(Circle())
-                        Text("Export")
-                            .foregroundColor(.black)
-                            .font(.subheadline)
-                    }
-                }
-
-                // Кнопка отмены
                 Button("Cancel") {
                     hideWithAnimation()
                 }
@@ -74,6 +98,7 @@ struct ExportMenuView: View {
             .cornerRadius(16)
             .shadow(radius: 10)
             .padding(.horizontal)
+            .frame(maxWidth: 300)
             .offset(y: showContent ? 0 : UIScreen.main.bounds.height / 2)
             .opacity(showContent ? 1 : 0)
             .animation(.easeOut(duration: 0.35), value: showContent)
@@ -98,7 +123,7 @@ struct ExportMenuView: View {
 }
 
 // MARK: - Типы экспорта
-enum ExportFormat: String {
+enum ExportFormat: String, CaseIterable {
     case png = "PNG"
     case jpeg = "JPEG"
     case pdf = "PDF"
