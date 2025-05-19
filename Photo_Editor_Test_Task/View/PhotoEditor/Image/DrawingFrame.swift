@@ -1,6 +1,7 @@
 
 import SwiftUI
 
+//MARK: - DrawingFrame is structure that creates the blue frame in the image
 struct DrawingFrame<Content: View>: View {
     let content: Content
 
@@ -10,11 +11,11 @@ struct DrawingFrame<Content: View>: View {
 
     var body: some View {
         content
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(Rectangle())
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                Rectangle()
                     .stroke(Color.accentColor, lineWidth: 3)
             )
-            .contentShape(RoundedRectangle(cornerRadius: 12))
+            .contentShape(Rectangle())
     }
 }

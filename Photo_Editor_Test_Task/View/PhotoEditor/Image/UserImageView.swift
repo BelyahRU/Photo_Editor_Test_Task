@@ -2,14 +2,15 @@
 import SwiftUI
 import PencilKit
 
+//MARK: UserImageView displays an image or message how to add it
 struct UserImageView: View {
-//    @State private var canvasView: PKCanvasView()
     @State private var toolPicker = PKToolPicker()
     
     @ObservedObject var viewModel: PhotoEditorViewModel
     
     var body: some View {
         Group {
+            //MARK: - Image
             if let image = viewModel.selectedImage {
                 ImageDrawingView(
                     image: image,
@@ -25,6 +26,7 @@ struct UserImageView: View {
                     },
                     texts: $viewModel.texts
                 )
+            //MARK: - Message
             } else {
                 if !viewModel.isSourceSelectorPresented {
                     VStack(spacing: 12) {

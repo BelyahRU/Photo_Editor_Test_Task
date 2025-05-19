@@ -62,88 +62,6 @@ struct PhotoEditorView: View {
     }
 }
 
-extension PhotoEditorViewModel {
-    /// Фактический размер, в котором отображается изображение на экране
-    var displayedImageSize: CGSize {
-        guard let selectedImage = selectedImage else { return .zero }
-        let screenWidth = UIScreen.main.bounds.width
-        let screenHeight: CGFloat = 350 // фиксированная высота, как в ImageDrawingView
-
-        let scaleFactor = min(
-            screenWidth / selectedImage.size.width,
-            screenHeight / selectedImage.size.height
-        )
-
-        return CGSize(
-            width: selectedImage.size.width * scaleFactor * scale,
-            height: selectedImage.size.height * scaleFactor * scale
-        )
-    }
-
-    func renderEditedImage(canvasView: PKCanvasView, imageSize: CGSize, scale: CGFloat) -> UIImage? {
-        guard let baseImage = selectedImage else { return nil }
-
-        let outputSize = CGSize(width: baseImage.size.width * scale, height: baseImage.size.height * scale)
-        let displayHeight: CGFloat = 350
-        let screenWidth = UIScreen.main.bounds.width
-
-        let scaleFactor = min(screenWidth / baseImage.size.width, displayHeight / baseImage.size.height)
-
-        let displaySize = CGSize(
-            width: baseImage.size.width * scaleFactor * scale,
-            height: baseImage.size.height * scaleFactor * scale
-        )
-
-        let ratioX = outputSize.width / displaySize.width
-        let ratioY = outputSize.height / displaySize.height
-
-        let renderer = UIGraphicsImageRenderer(size: outputSize)
-        return renderer.image { context in
-            let cgContext = context.cgContext
-            cgContext.saveGState()
-
-            baseImage.draw(in: CGRect(origin: .zero, size: outputSize))
-
-            let canvasImage = canvasView.drawing.image(from: canvasView.bounds, scale: 1.0)
-            canvasImage.draw(in: CGRect(origin: .zero, size: outputSize))
-
-            for text in texts {
-                let paragraphStyle = NSMutableParagraphStyle()
-                paragraphStyle.alignment = .center
-
-                let scaledFontSize = text.fontSize * ratioY
-                let attributes: [NSAttributedString.Key: Any] = [
-                    .font: UIFont(name: text.fontName, size: scaledFontSize) ?? UIFont.systemFont(ofSize: scaledFontSize),
-                    .foregroundColor: UIColor(text.color),
-                    .paragraphStyle: paragraphStyle
-                ]
-
-                let attributedString = NSAttributedString(string: text.text, attributes: attributes)
-                let textSize = attributedString.size()
-
-                let drawRect = CGRect(
-                    origin: CGPoint(
-                        x: text.position.width * ratioX - textSize.width / 2,
-                        y: text.position.height * ratioY - textSize.height / 2
-                    ),
-                    size: textSize
-                )
-
-                print("drawRect:", drawRect)
-                attributedString.draw(in: drawRect)
-            }
-
-            cgContext.restoreGState()
-        }
-    }
-
-
-
-
-}
-
-
-
 private extension PhotoEditorView {
     
     //MARK: - FilterSelectorView
@@ -204,7 +122,7 @@ private extension PhotoEditorView {
     //MARK: - TextEditorModalView
     var textEditorModalView: some View {
         TextEditorModalView(
-            selectedImage: viewModel.selectedImage, // ← вот это добавили
+            selectedImage: viewModel.selectedImage,
             isPresented: $viewModel.isTextEditing,
             addedText: $viewModel.addedText,
             textColor: $viewModel.textColor,

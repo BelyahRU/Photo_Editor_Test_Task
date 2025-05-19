@@ -1,6 +1,8 @@
+
 import SwiftUI
 import PencilKit
 
+//MARK: - The main view in the application, collects image(filter + draw + text + image)
 struct ImageDrawingView: View {
     // MARK: - Inputs
     var image: UIImage
@@ -20,6 +22,7 @@ struct ImageDrawingView: View {
             let containerSize = geo.size
             let imageSize = image.size
 
+            // Calculates how the image should scale inside container
             let scaleFactor = min(
                 containerSize.width / imageSize.width,
                 containerSize.height / imageSize.height
@@ -36,6 +39,7 @@ struct ImageDrawingView: View {
             )
 
             ZStack {
+                // Base image frame
                 DrawingFrame {
                     Color.clear
                         .frame(width: displaySize.width, height: displaySize.height)
@@ -46,6 +50,7 @@ struct ImageDrawingView: View {
                         .frame(width: displaySize.width, height: displaySize.height)
                 }
 
+                // Drawing overlay
                 DrawingFrame {
                     CanvasViewRepresentable(
                         canvasView: .constant(canvasView),
@@ -57,62 +62,14 @@ struct ImageDrawingView: View {
                     .zIndex(10)
                 }
 
+                // Text overlays
                 ForEach($texts) { $text in
-                    let displayX = text.position.width * scale
-                    let displayY = text.position.height * scale
-
-                    Text(text.text)
-                        .font(.custom(text.fontName, size: text.fontSize * scale))
-                        .foregroundColor(text.color)
-                        .padding(4)
-                        .background(Color.black.opacity(0.3))
-                        .cornerRadius(6)
-                        .position(x: imageOrigin.x + displayX, y: imageOrigin.y + displayY)
-                        .zIndex(1000)
-                        .gesture(
-                            TapGesture(count: 2)
-                                .onEnded {
-                                    viewModel.editingTextID = text.id
-                                    viewModel.addedText = text.text
-                                    viewModel.textColor = text.color
-                                    viewModel.textFontSize = text.fontSize
-                                    viewModel.textFontName = text.fontName
-                                    viewModel.textPosition = text.position
-                                    viewModel.isTextEditing = true
-                                }
-                        )
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    let relativeX = (value.location.x - imageOrigin.x)
-                                    let relativeY = (value.location.y - imageOrigin.y)
-
-                                    text.position = CGSize(width: relativeX, height: relativeY)
-                                    viewModel.isDraggingTextNow = true
-                                }
-                                .onEnded { value in
-                                    let relativeX = (value.location.x - imageOrigin.x)
-                                    let relativeY = (value.location.y - imageOrigin.y)
-
-                                    text.position = CGSize(width: relativeX, height: relativeY)
-                                    viewModel.isDraggingTextNow = false
-                                }
-                        )
+                    textView(for: $text, in: imageOrigin)
                 }
             }
             .offset(offset)
             .simultaneousGesture(
-                DragGesture()
-                    .onChanged { value in
-                        if !isDrawingEnabled && !viewModel.isDraggingTextNow {
-                            onOffsetChange(value.translation)
-                        }
-                    }
-                    .onEnded { value in
-                        if !isDrawingEnabled && !viewModel.isDraggingTextNow {
-                            onOffsetChange(value.translation)
-                        }
-                    },
+                dragToPanGesture(enabled: !isDrawingEnabled && !viewModel.isDraggingTextNow),
                 including: .all
             )
             .rotationEffect(rotation)
@@ -120,5 +77,72 @@ struct ImageDrawingView: View {
             .clipped()
         }
         .frame(height: 350)
+    }
+}
+
+
+private extension ImageDrawingView {
+    // Builds the text overlay view with drag and double tap edit
+    @ViewBuilder
+    func textView(for text: Binding<TextElement>, in imageOrigin: CGPoint) -> some View {
+        let displayX = text.wrappedValue.position.width * scale
+        let displayY = text.wrappedValue.position.height * scale
+
+        Text(text.wrappedValue.text)
+            .font(.custom(text.wrappedValue.fontName, size: text.wrappedValue.fontSize * scale))
+            .foregroundColor(text.wrappedValue.color)
+            .padding(4)
+            .background(Color.black.opacity(0.3))
+            .cornerRadius(6)
+            .position(x: imageOrigin.x + displayX, y: imageOrigin.y + displayY)
+            .zIndex(1000)
+            .gesture(editGesture(for: text.wrappedValue))
+            .gesture(dragGesture(for: text, origin: imageOrigin))
+    }
+
+    // Double-tap to edit text
+    func editGesture(for text: TextElement) -> some Gesture {
+        TapGesture(count: 2)
+            .onEnded {
+                viewModel.editingTextID = text.id
+                viewModel.addedText = text.text
+                viewModel.textColor = text.color
+                viewModel.textFontSize = text.fontSize
+                viewModel.textFontName = text.fontName
+                viewModel.textPosition = text.position
+                viewModel.isTextEditing = true
+            }
+    }
+
+    // Drag gesture for text repositioning
+    func dragGesture(for text: Binding<TextElement>, origin: CGPoint) -> some Gesture {
+        DragGesture()
+            .onChanged { value in
+                let relativeX = value.location.x - origin.x
+                let relativeY = value.location.y - origin.y
+                text.wrappedValue.position = CGSize(width: relativeX, height: relativeY)
+                viewModel.isDraggingTextNow = true
+            }
+            .onEnded { value in
+                let relativeX = value.location.x - origin.x
+                let relativeY = value.location.y - origin.y
+                text.wrappedValue.position = CGSize(width: relativeX, height: relativeY)
+                viewModel.isDraggingTextNow = false
+            }
+    }
+
+    // Drag gesture to move the entire image
+    func dragToPanGesture(enabled: Bool) -> some Gesture {
+        DragGesture()
+            .onChanged { value in
+                if enabled {
+                    onOffsetChange(value.translation)
+                }
+            }
+            .onEnded { value in
+                if enabled {
+                    onOffsetChange(value.translation)
+                }
+            }
     }
 }

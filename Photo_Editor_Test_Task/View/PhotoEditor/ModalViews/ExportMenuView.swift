@@ -122,9 +122,3 @@ struct ExportMenuView: View {
     }
 }
 
-// MARK: - Типы экспорта
-enum ExportFormat: String, CaseIterable {
-    case png = "PNG"
-    case jpeg = "JPEG"
-    case pdf = "PDF"
-}

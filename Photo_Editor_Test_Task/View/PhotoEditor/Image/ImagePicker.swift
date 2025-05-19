@@ -2,6 +2,7 @@
 import SwiftUI
 import UIKit
 
+//MARK: - ImagePicker allows you to download an image from a source
 struct ImagePicker: UIViewControllerRepresentable {
     let sourceType: UIImagePickerController.SourceType
     var onImagePicked: (UIImage) -> Void
