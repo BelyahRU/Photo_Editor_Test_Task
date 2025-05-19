@@ -13,6 +13,7 @@ struct PhotoEditorView: View {
 
                 ScaleAndRotationSettingsView(viewModel: viewModel)
             }
+            .padding(.top, -150)
             .navigationBarTitle("Photo Editor")
             .toolbar {
                 ToolbarView(
