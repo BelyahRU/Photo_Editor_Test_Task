@@ -88,6 +88,7 @@ private extension PhotoEditorView {
                     scale: viewModel.scale,
                     rotation: viewModel.rotation,
                     offset: viewModel.imageOffset,
+                    viewModel: viewModel,
                     onOffsetChange: { newOffset in
                         viewModel.imageOffset = newOffset
                     },
@@ -289,19 +290,37 @@ private extension PhotoEditorView {
                     .pickerStyle(SegmentedPickerStyle())
                     .padding(.horizontal)
 
-                    Button("Done") {
-                        let newText = TextElement(
-                            text: viewModel.addedText,
-                            fontName: viewModel.textFontName,
-                            fontSize: viewModel.textFontSize,
-                            color: viewModel.textColor,
-                            position: CGSize(width: 0, height: 0) // можно добавить центр, если знаешь размер
-                        )
-                        viewModel.texts.append(newText)
+                    HStack {
+                        Button("Delete") {
+                            if let id = viewModel.editingTextID {
+                                viewModel.texts.removeAll { $0.id == id }
+                            }
+                            resetTextEditor()
+                        }
+                        .foregroundColor(.red)
 
-                        viewModel.addedText = ""
-                        viewModel.textPosition = .zero
-                        viewModel.isTextEditing = false
+                        Spacer()
+
+                        Button("Done") {
+                            if let id = viewModel.editingTextID,
+                               let index = viewModel.texts.firstIndex(where: { $0.id == id }) {
+                                viewModel.texts[index].text = viewModel.addedText
+                                viewModel.texts[index].color = viewModel.textColor
+                                viewModel.texts[index].fontSize = viewModel.textFontSize
+                                viewModel.texts[index].fontName = viewModel.textFontName
+                                viewModel.texts[index].position = viewModel.textPosition
+                            } else {
+                                let newText = TextElement(
+                                    text: viewModel.addedText,
+                                    fontName: viewModel.textFontName,
+                                    fontSize: viewModel.textFontSize,
+                                    color: viewModel.textColor,
+                                    position: .zero
+                                )
+                                viewModel.texts.append(newText)
+                            }
+                            resetTextEditor()
+                        }
                     }
                     .padding()
                 }
@@ -313,6 +332,16 @@ private extension PhotoEditorView {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
+    }
+
+    func resetTextEditor() {
+        viewModel.addedText = ""
+        viewModel.textColor = .white
+        viewModel.textFontSize = 24
+        viewModel.textFontName = "HelveticaNeue"
+        viewModel.textPosition = .zero
+        viewModel.isTextEditing = false
+        viewModel.editingTextID = nil
     }
 
 }

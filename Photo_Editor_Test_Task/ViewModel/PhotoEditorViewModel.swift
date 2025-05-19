@@ -9,6 +9,8 @@ class PhotoEditorViewModel: ObservableObject {
     @Published var scale: CGFloat = 1.0 // масштаб
     @Published var rotation: Angle = .zero // поворот
     @Published var imageOffset: CGSize = .zero
+    @Published var isDraggingTextNow: Bool = false
+
     var imageSize: CGSize {
         selectedImage?.size ?? .zero
     }
@@ -31,6 +33,9 @@ class PhotoEditorViewModel: ObservableObject {
     @Published var textFontName: String = "HelveticaNeue"
     @Published var isTextEditing: Bool = false
     @Published var textPosition: CGSize = .zero
+    
+    @Published var editingTextID: UUID? = nil
+
 
     
     private var appState = AppStateService.shared

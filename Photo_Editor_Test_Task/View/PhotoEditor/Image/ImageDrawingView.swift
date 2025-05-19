@@ -11,12 +11,10 @@ struct ImageDrawingView: View {
     var scale: CGFloat
     var rotation: Angle
     var offset: CGSize
+    var viewModel: PhotoEditorViewModel
     var onOffsetChange: (CGSize) -> Void
     
-    @Binding var texts: [TextElement] // ← добавляем!
-    @State private var isDraggingText: Bool = false
-
-    
+    @Binding var texts: [TextElement]
 
     var body: some View {
         GeometryReader { geo in
@@ -54,25 +52,42 @@ struct ImageDrawingView: View {
                     .frame(width: displaySize.width, height: displaySize.height)
                     .zIndex(10)
                 }
-
+                
                 ForEach($texts) { $text in
+                    let scaledPosition = CGSize(
+                        width: text.position.width * scale,
+                        height: text.position.height * scale
+                    )
+                    
                     Text(text.text)
-                        .font(.custom(text.fontName, size: text.fontSize))
+                        .font(.custom(text.fontName, size: text.fontSize * scale)) // ← Масштабируем fontSize
                         .foregroundColor(text.color)
                         .padding(4)
                         .background(Color.black.opacity(0.3))
                         .cornerRadius(6)
-                        .offset(text.position)
+                        .offset(scaledPosition) // ← Масштабируем позицию
                         .zIndex(1000)
+                        .gesture(
+                            TapGesture(count: 2)
+                                .onEnded {
+                                    viewModel.editingTextID = text.id
+                                    viewModel.addedText = text.text
+                                    viewModel.textColor = text.color
+                                    viewModel.textFontSize = text.fontSize
+                                    viewModel.textFontName = text.fontName
+                                    viewModel.textPosition = text.position
+                                    viewModel.isTextEditing = true
+                                }
+                        )
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
                                     text.position = value.translation
-                                    isDraggingText = true
+                                    viewModel.isDraggingTextNow = true
                                 }
                                 .onEnded { value in
                                     text.position = value.translation
-                                    isDraggingText = false
+                                    viewModel.isDraggingTextNow = false
                                 }
                         )
                 }
@@ -81,22 +96,21 @@ struct ImageDrawingView: View {
             .simultaneousGesture(
                 DragGesture()
                     .onChanged { value in
-                        if !isDrawingEnabled && !isDraggingText {
+                        if !isDrawingEnabled && !viewModel.isDraggingTextNow {
                             onOffsetChange(value.translation)
                         }
                     }
                     .onEnded { value in
-                        if !isDrawingEnabled && !isDraggingText {
+                        if !isDrawingEnabled && !viewModel.isDraggingTextNow {
                             onOffsetChange(value.translation)
                         }
-                    }
+                    },
+                including: .all
             )
             .rotationEffect(rotation)
             .frame(maxWidth: .infinity, maxHeight: 350, alignment: .center)
             .clipped()
-
         }
         .frame(height: 350)
-        
     }
 }
