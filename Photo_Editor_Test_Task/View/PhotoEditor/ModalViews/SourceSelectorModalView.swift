@@ -21,6 +21,7 @@ struct SourceSelectorModalView: View {
                     .font(.title3)
                     .bold()
                     .padding(.top)
+                    .foregroundColor(.black)
 
                 HStack(spacing: 40) {
                     //MARK: - Gallery

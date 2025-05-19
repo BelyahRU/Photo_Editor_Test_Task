@@ -24,6 +24,7 @@ struct ExportMenuView: View {
                     .font(.title3)
                     .bold()
                     .padding(.top)
+                    .foregroundColor(.black)
 
                 exportOptions
 

@@ -23,6 +23,7 @@ struct FilterSelectorModalView: View {
                     .font(.title3)
                     .bold()
                     .padding(.top)
+                    .foregroundColor(.black)
 
                 ScrollView {
                     VStack(spacing: 16) {

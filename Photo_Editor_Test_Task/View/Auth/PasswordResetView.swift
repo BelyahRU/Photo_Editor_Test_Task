@@ -59,6 +59,7 @@ private extension PasswordResetView {
         Text("Reset your password")
             .font(.title3)
             .bold()
+            .foregroundColor(.black)
     }
     
     var emailTF: some View {

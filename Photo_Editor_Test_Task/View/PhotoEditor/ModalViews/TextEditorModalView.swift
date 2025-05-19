@@ -16,11 +16,12 @@ struct TextEditorModalView: View {
     var body: some View {
         if isPresented {
             VStack(spacing: 12) {
+                
                 //MARK: - TextField
                 TextField("Enter text", text: $addedText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
-                    .foregroundStyle(textColor == .white ? .black : textColor)
+                    .foregroundColor(textColor == .white ? .primary : textColor)
                     .font(.custom(textFontName, size: textFontSize))
                 
                 //MARK: - Font Slider
@@ -31,6 +32,7 @@ struct TextEditorModalView: View {
                 } maximumValueLabel: {
                     Text("60")
                 }
+                .padding(.horizontal)
                 
                 //MARK: - Font Color picker
                 ColorPicker("Text Color", selection: $textColor)
@@ -44,7 +46,6 @@ struct TextEditorModalView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
-                
                 
                 HStack {
                     Button("Delete") {
@@ -65,9 +66,11 @@ struct TextEditorModalView: View {
                 .padding()
             }
             .padding()
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(radius: 10)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground)) // Adapts to dark/light mode
+                    .shadow(radius: 10)
+            )
             .padding(.horizontal)
             .transition(.move(edge: .bottom).combined(with: .opacity))
         }
@@ -116,7 +119,6 @@ struct TextEditorModalView: View {
         }
     }
 
-    
     private func reset() {
         addedText = ""
         textColor = .white
